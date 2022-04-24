@@ -1,0 +1,62 @@
+from PyQt5 import  uic,QtWidgets
+import mysql.connector
+import pandas as pd
+
+
+
+#CONECTANDO AO BANCO DE DADOS
+banco = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="",
+    database="cadastro_pessoas"
+)
+
+
+#PEGA OS DADOS, MOSTRA NO TERMINAL E ENVIA PARA O BANCO
+def funcao_principal():
+    #PEGANDO OS DADOS
+    nome = formulario.le_nome.text()
+    cpf = formulario.le_cpf.text()
+    nasc = formulario.le_nasc.text()
+    sexo = ''
+
+    #SEXO
+    if formulario.rb_masc.isChecked() :
+        print("Sexo masculino")
+        sexo = 'Masculino'
+
+    else :
+        print("Sexo feminino")
+        sexo = 'Feminino'
+
+    print("nome:",nome)
+    print("cpf:",cpf)
+    print("nasc",nasc)
+    
+    try:
+        #ENVIA OS DADOS PARA O BANCO VIA SQL
+        cursor = banco.cursor()
+        comando_SQL = "INSERT INTO cadastro (nome,cpf,nascimento,sexo) VALUES (%s,%s,%s,%s)"
+        dados = (str(nome),str(cpf),str(nasc),sexo)
+        cursor.execute(comando_SQL,dados)
+        banco.commit()
+        formulario.lbl_situacao.setText("Cadastrado com Sucesso!")
+    except:
+        formulario.lbl_situacao.setText("Erro ao cadastrar")
+
+    #LIMPA OS CAMPOS APOS O ENVIO DOS DADOS
+    formulario.le_nome.setText("")
+    formulario.le_cpf.setText("")
+    formulario.le_nasc.setText("")
+
+   # dados_pandas = pd.DataFrame[{"Nome" : nome,"Cpf" : cpf,"Nascimento": nasc,"Sexo": sexo}]
+   # print(dados_pandas)
+
+
+app=QtWidgets.QApplication([])
+formulario=uic.loadUi("formulario.ui")
+formulario.pb_enviar.clicked.connect(funcao_principal)
+
+formulario.show()
+app.exec()
